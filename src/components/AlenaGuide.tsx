@@ -2,282 +2,272 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Icon from '@/components/ui/icon';
 
 const TOUR_STEPS = [
-  {
-    section: 'home',
-    text: 'Привет! Я Алёна, твой гид по Сочи 🌊 Добро пожаловать в жемчужину России! Сейчас ты на главной — здесь ты видишь самые красивые виды города.',
-    emoji: '👋',
-    label: 'Главная',
-  },
-  {
-    section: 'history',
-    text: 'Сочи основан в 1838 году как военная крепость. Знаешь, что Сталин лично выбрал этот город курортом всей страны? В 30-х здесь строились грандиозные санатории!',
-    emoji: '📜',
-    label: 'История',
-  },
-  {
-    section: 'sights',
-    text: 'Мои любимые места — Агурские водопады и Дендрарий 🌿 Советую начать с набережной утром, пока нет толпы. Вид на горы в утреннем тумане — незабываемо!',
-    emoji: '🗺️',
-    label: 'Достопримечательности',
-  },
-  {
-    section: 'gallery',
-    text: 'Смотри какая красота! Кстати, лучшие фото получаются на смотровой площадке Орлиные скалы — там открывается панорама на 40 км побережья.',
-    emoji: '📸',
-    label: 'Галерея',
-  },
-  {
-    section: 'tours',
-    text: 'Если выбираешь между морем и горами — выбирай горы с утра, море вечером 🏔️ Температура на Розе Хутор в июле — комфортные +18°, идеально для прогулок!',
-    emoji: '🎒',
-    label: 'Экскурсии',
-  },
-  {
-    section: 'hotels',
-    text: 'По секрету: санатории советской постройки — лучшее соотношение цены и качества. Там и лечебные ванны, и своя пляжная зона, и всё включено!',
-    emoji: '🏨',
-    label: 'Отели',
-  },
-  {
-    section: 'weather',
-    text: 'Идеальное время для поездки — конец мая или сентябрь ☀️ Народу меньше, цены ниже, а море тёплое. Плюс магнолии цветут весной — это просто восторг!',
-    emoji: '🌤️',
-    label: 'Погода',
-  },
-  {
-    section: 'map',
-    text: 'Посмотри на карту — все главные места совсем рядом! Из центра до Дендрария пешком 15 минут, а до Олимпийского парка — 30 минут на электричке.',
-    emoji: '🗺️',
-    label: 'Карта',
-  },
-  {
-    section: 'contacts',
-    text: 'Остались вопросы? Пиши нам! А я буду ждать тебя в Сочи ☀️ Приезжай — горы, море и самый вкусный чай из местных трав уже ждут тебя!',
-    emoji: '✉️',
-    label: 'Контакты',
-  },
+  { section: 'home',    text: 'Привет! Я Алёна, гид по Сочи 🌊 Ты сейчас на главной — полюбуйся слайдером с нашими лучшими видами!', emoji: '👋', label: 'Главная' },
+  { section: 'history', text: 'Сочи основан в 1838 году. Знаешь, что Сталин лично выбрал город курортом всей страны? В 30-х здесь строились грандиозные санатории!', emoji: '📜', label: 'История' },
+  { section: 'sights',  text: 'Мои любимые места — Агурские водопады и Дендрарий 🌿 Советую приходить утром, пока нет толпы. Вид на горы в тумане — незабываемо!', emoji: '🗺️', label: 'Достопримечательности' },
+  { section: 'gallery', text: 'Смотри как красиво! Лучшие фото — на смотровой Орлиные скалы. Там панорама на 40 км побережья открывается!', emoji: '📸', label: 'Галерея' },
+  { section: 'tours',   text: 'Выбираешь между морем и горами? Горы утром, море вечером 🏔️ На Розе Хутор в июле +18° — идеально для прогулок!', emoji: '🎒', label: 'Экскурсии' },
+  { section: 'hotels',  text: 'По секрету: санатории советской постройки — лучшее соотношение цены и качества. Лечебные ванны, пляж и всё включено!', emoji: '🏨', label: 'Отели' },
+  { section: 'weather', text: 'Лучшее время — конец мая или сентябрь ☀️ Народу меньше, цены ниже, море тёплое. И магнолии цветут — это восторг!', emoji: '🌤️', label: 'Погода' },
+  { section: 'map',     text: 'Все главные места совсем рядом! До Дендрария пешком 15 минут, до Олимпийского парка — 30 минут на электричке.', emoji: '🗺️', label: 'Карта' },
+  { section: 'contacts',text: 'Остались вопросы? Пиши нам! А я буду ждать тебя в Сочи ☀️ Горы, море и чай из местных трав — всё уже ждёт!', emoji: '✉️', label: 'Контакты' },
 ];
 
 const IDLE_PHRASES = [
-  'Привет! Нажми на меня, чтобы узнать секреты Сочи 🌊',
-  'Хочешь, расскажу, где лучшие закаты? 🌅',
-  'Знаешь, где снимали фильм «Бриллиантовая рука»? 😄',
-  'В Сочи есть единственная субтропическая чайная плантация России!',
-  'Нажми, и я проведу экскурсию по сайту 🎒',
+  'Привет! Нажми, чтобы узнать секреты Сочи 🌊',
+  'Расскажу, где лучшие закаты? 🌅',
+  'Знаешь, где снимали «Бриллиантовую руку»? 😄',
+  'В Сочи единственная субтропическая чайная плантация России!',
+  'Нажми — проведу экскурсию по сайту 🎒',
 ];
 
-function AlenaSvgAvatar({ mood }: { mood: 'idle' | 'talking' | 'waving' | 'thinking' }) {
-  // Рот
-  const mouthD = mood === 'talking'
-    ? 'M 16 27 Q 20 32 24 27'
-    : mood === 'thinking'
-    ? 'M 17 27 Q 20 29 23 27'
-    : 'M 16 26 Q 20 31 24 26';
+/* ─────────────────────── КРАСИВЫЙ SVG-АВАТАР ─────────────────────── */
+function AlenaFace({ mood }: { mood: 'idle' | 'talking' | 'waving' | 'thinking' }) {
+  const isTalking  = mood === 'talking';
+  const isThinking = mood === 'thinking';
+  const isWaving   = mood === 'waving';
 
   return (
-    <svg viewBox="0 0 56 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      {/* === ВОЛОСЫ ЗАДНИЕ === */}
-      <ellipse cx="28" cy="22" rx="18" ry="20" fill="#4a2810" />
-      {/* Пряди по бокам */}
-      <path d="M 10 22 Q 6 38 9 52 Q 11 60 14 66" stroke="#4a2810" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M 46 22 Q 50 38 47 52 Q 45 60 42 66" stroke="#4a2810" strokeWidth="6" strokeLinecap="round" fill="none"/>
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        {/* Градиенты кожи */}
+        <radialGradient id="skinGrad" cx="45%" cy="40%" r="60%">
+          <stop offset="0%"   stopColor="#fde0c0" />
+          <stop offset="100%" stopColor="#f4a96a" />
+        </radialGradient>
+        <radialGradient id="cheekL" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="#ffaaaa" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#ffaaaa" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="cheekR" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="#ffaaaa" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#ffaaaa" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="hairGrad" cx="40%" cy="30%" r="70%">
+          <stop offset="0%"   stopColor="#6b3a1f" />
+          <stop offset="100%" stopColor="#2e1508" />
+        </radialGradient>
+        <radialGradient id="irisL" cx="35%" cy="35%" r="65%">
+          <stop offset="0%"   stopColor="#6b4226" />
+          <stop offset="100%" stopColor="#1e0c04" />
+        </radialGradient>
+        <radialGradient id="irisR" cx="35%" cy="35%" r="65%">
+          <stop offset="0%"   stopColor="#6b4226" />
+          <stop offset="100%" stopColor="#1e0c04" />
+        </radialGradient>
+        <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
 
-      {/* === ШЕЯ === */}
-      <rect x="22" y="42" width="12" height="10" rx="4" fill="#f5b882" />
+      {/* ── ВОЛОСЫ СЗАДИ ── */}
+      <ellipse cx="50" cy="42" rx="33" ry="36" fill="url(#hairGrad)" />
+      {/* Длинные пряди */}
+      <path d="M 18 42 Q 10 62 14 82 Q 16 90 20 96" stroke="#3a1a08" strokeWidth="9" strokeLinecap="round" fill="none"/>
+      <path d="M 82 42 Q 90 62 86 82 Q 84 90 80 96" stroke="#3a1a08" strokeWidth="9" strokeLinecap="round" fill="none"/>
+      {/* Средние пряди */}
+      <path d="M 22 50 Q 16 68 18 84"  stroke="#2e1508" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.6"/>
+      <path d="M 78 50 Q 84 68 82 84" stroke="#2e1508" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.6"/>
 
-      {/* === ОДЕЖДА === */}
-      <path d="M 12 52 Q 10 62 10 72 L 46 72 Q 46 62 44 52 Q 38 46 28 46 Q 18 46 12 52 Z" fill="#1e3a5f" />
-      {/* Воротник V */}
-      <path d="M 20 48 L 28 58 L 36 48" fill="none" stroke="#2d5a9e" strokeWidth="2" strokeLinejoin="round" />
-      {/* Узор рубашки */}
-      <path d="M 16 56 Q 22 54 28 56 Q 34 58 40 56" stroke="#2d5a9e" strokeWidth="1" fill="none" opacity="0.5" />
+      {/* ── ШЕЯ ── */}
+      <rect x="40" y="72" width="20" height="18" rx="7" fill="url(#skinGrad)" />
+      <rect x="42" y="72" width="16" height="6"  rx="3" fill="#e8a060" opacity="0.3" />
 
-      {/* === ЛИЦО === */}
-      <ellipse cx="28" cy="26" rx="15" ry="16" fill="#f9c89e" />
+      {/* ── ОДЕЖДА ── */}
+      <path d="M 22 88 Q 18 100 18 100 L 82 100 Q 82 100 78 88 Q 70 78 50 76 Q 30 78 22 88 Z" fill="#1a3a6a" />
+      {/* Блик на ткани */}
+      <path d="M 30 84 Q 42 80 50 82 Q 58 80 70 84" stroke="#2d5fa0" strokeWidth="1.5" fill="none" opacity="0.6" />
+      {/* V-вырез */}
+      <path d="M 38 78 L 50 92 L 62 78" fill="none" stroke="#2d5fa0" strokeWidth="2.5" strokeLinejoin="round" />
 
-      {/* Тень под подбородком */}
-      <ellipse cx="28" cy="40" rx="10" ry="3" fill="#e8a870" opacity="0.3" />
+      {/* ── ЛИЦО ── */}
+      <ellipse cx="50" cy="46" rx="26" ry="28" fill="url(#skinGrad)" />
+      {/* Мягкая тень снизу */}
+      <ellipse cx="50" cy="70" rx="18" ry="5" fill="#c87840" opacity="0.18" />
 
-      {/* Румянец */}
-      <ellipse cx="15" cy="30" rx="4" ry="2.5" fill="#ffb4b4" opacity="0.45" />
-      <ellipse cx="41" cy="30" rx="4" ry="2.5" fill="#ffb4b4" opacity="0.45" />
+      {/* ── РУМЯНЕЦ ── */}
+      <ellipse cx="28" cy="54" rx="8" ry="5" fill="url(#cheekL)" />
+      <ellipse cx="72" cy="54" rx="8" ry="5" fill="url(#cheekR)" />
 
-      {/* === БРОВИ === */}
+      {/* ── БРОВИ (тонкие, изогнутые) ── */}
       <path
-        d="M 17 19 Q 21 17 24 18"
-        stroke="#3d2010"
-        strokeWidth="1.8"
+        d={isThinking ? 'M 30 34 Q 37 30 42 31' : 'M 30 35 Q 37 31 42 33'}
+        stroke="#4a2010"
+        strokeWidth="2.2"
         strokeLinecap="round"
         fill="none"
-        style={{ transform: mood === 'thinking' ? 'translateY(-1px)' : 'none' }}
       />
       <path
-        d="M 32 18 Q 35 17 39 19"
-        stroke="#3d2010"
-        strokeWidth="1.8"
+        d={isThinking ? 'M 58 31 Q 63 30 70 34' : 'M 58 33 Q 63 31 70 35'}
+        stroke="#4a2010"
+        strokeWidth="2.2"
         strokeLinecap="round"
         fill="none"
-        style={{ transform: mood === 'thinking' ? 'translateY(-1px)' : 'none' }}
       />
 
-      {/* === ГЛАЗА === */}
-      {/* Левый */}
-      <ellipse cx="21" cy="25" rx="4" ry={mood === 'talking' ? 2.5 : 4} fill="#fff" />
-      <ellipse cx="21" cy="25" rx="2.8" ry={mood === 'talking' ? 2 : 2.8} fill="#3d1a08" />
-      <circle cx="22.2" cy="23.8" r="1" fill="white" opacity="0.85" />
-      {/* Правый */}
-      <ellipse cx="35" cy="25" rx="4" ry={mood === 'talking' ? 2.5 : 4} fill="#fff" />
-      <ellipse cx="35" cy="25" rx="2.8" ry={mood === 'talking' ? 2 : 2.8} fill="#3d1a08" />
-      <circle cx="36.2" cy="23.8" r="1" fill="white" opacity="0.85" />
+      {/* ── ГЛАЗА ── */}
+      {/* Верхние веки (форма) */}
+      <path d="M 30 44 Q 36 39 42 44" fill="#f9c89e" stroke="#4a2010" strokeWidth="1.2" />
+      <path d="M 58 44 Q 64 39 70 44" fill="#f9c89e" stroke="#4a2010" strokeWidth="1.2" />
 
-      {/* === НОС === */}
-      <path d="M 27 28 Q 26 31 27 32 Q 29 33 30 31" stroke="#d4895a" strokeWidth="1" fill="none" strokeLinecap="round" />
+      {/* Белки */}
+      <ellipse cx="36" cy="46" rx="6" ry={isTalking ? 3.5 : 5} fill="white" filter="url(#softGlow)" />
+      <ellipse cx="64" cy="46" rx="6" ry={isTalking ? 3.5 : 5} fill="white" filter="url(#softGlow)" />
 
-      {/* === РОТ === */}
-      <path d={mouthD} stroke="#c97d50" strokeWidth="2" fill="none" strokeLinecap="round" />
-      {mood === 'talking' && (
-        <path d="M 18 28.5 Q 20 32 24 28" fill="#ff9999" opacity="0.35" />
-      )}
-      {/* Улыбка-ямочки */}
-      {mood !== 'thinking' && (
+      {/* Радужка */}
+      <ellipse cx="36" cy="46" rx="4.2" ry={isTalking ? 3 : 4.2} fill="url(#irisL)" />
+      <ellipse cx="64" cy="46" rx="4.2" ry={isTalking ? 3 : 4.2} fill="url(#irisR)" />
+
+      {/* Зрачок */}
+      <ellipse cx="36" cy="46" rx="2.2" ry={isTalking ? 2 : 2.2} fill="#0d0503" />
+      <ellipse cx="64" cy="46" rx="2.2" ry={isTalking ? 2 : 2.2} fill="#0d0503" />
+
+      {/* Блик в глазах */}
+      <circle cx="37.8" cy="44.2" r="1.4" fill="white" opacity="0.9" />
+      <circle cx="65.8" cy="44.2" r="1.4" fill="white" opacity="0.9" />
+      <circle cx="35.2" cy="47.5" r="0.7" fill="white" opacity="0.5" />
+      <circle cx="63.2" cy="47.5" r="0.7" fill="white" opacity="0.5" />
+
+      {/* Нижние ресницы-тени */}
+      <path d="M 30 48 Q 36 51 42 48" stroke="#e8a060" strokeWidth="0.8" fill="none" opacity="0.4" />
+      <path d="M 58 48 Q 64 51 70 48" stroke="#e8a060" strokeWidth="0.8" fill="none" opacity="0.4" />
+
+      {/* ── НОС ── */}
+      <path d="M 48 52 Q 46 57 48 59 Q 52 60 54 57" stroke="#d4895a" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+
+      {/* ── РОТ ── */}
+      {isTalking ? (
         <>
-          <circle cx="15.5" cy="32" r="1" fill="#e8a070" opacity="0.5" />
-          <circle cx="40.5" cy="32" r="1" fill="#e8a070" opacity="0.5" />
+          <path d="M 38 64 Q 50 72 62 64" fill="#e8706a" opacity="0.9" />
+          <path d="M 38 64 Q 50 72 62 64" stroke="#c05040" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          {/* Зубки */}
+          <path d="M 42 65 Q 50 68 58 65" fill="white" opacity="0.85" />
+          <path d="M 38 64 Q 50 70 62 64" stroke="#c05040" strokeWidth="1" fill="none" opacity="0.5" />
+        </>
+      ) : isThinking ? (
+        <path d="M 40 64 Q 50 67 60 64" stroke="#c97d50" strokeWidth="2" fill="none" strokeLinecap="round" />
+      ) : (
+        <>
+          <path d="M 38 63 Q 50 72 62 63" stroke="#c97d50" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <path d="M 38 63 Q 50 70 62 63" fill="#e8908a" opacity="0.25" />
         </>
       )}
 
-      {/* === СЕРЬГИ === */}
-      <circle cx="13.5" cy="30" r="2" fill="#d4af37" />
-      <circle cx="42.5" cy="30" r="2" fill="#d4af37" />
-      <circle cx="13.5" cy="34" r="1.2" fill="#d4af37" opacity="0.7" />
-      <circle cx="42.5" cy="34" r="1.2" fill="#d4af37" opacity="0.7" />
+      {/* Ямочки */}
+      {!isThinking && (
+        <>
+          <circle cx="30" cy="62" r="1.5" fill="#d4895a" opacity="0.4" />
+          <circle cx="70" cy="62" r="1.5" fill="#d4895a" opacity="0.4" />
+        </>
+      )}
 
-      {/* === ЧЁЛКА === */}
-      <path d="M 10 20 Q 13 10 28 11 Q 43 10 46 20 Q 42 16 28 17 Q 14 16 10 20 Z" fill="#4a2810" />
+      {/* ── СЕРЬГИ ── */}
+      <circle cx="24" cy="52" r="3"   fill="#d4af37" />
+      <circle cx="24" cy="58" r="2"   fill="#d4af37" opacity="0.8" />
+      <circle cx="24" cy="63" r="1.3" fill="#d4af37" opacity="0.5" />
+      <circle cx="76" cy="52" r="3"   fill="#d4af37" />
+      <circle cx="76" cy="58" r="2"   fill="#d4af37" opacity="0.8" />
+      <circle cx="76" cy="63" r="1.3" fill="#d4af37" opacity="0.5" />
+
+      {/* Блик на серьгах */}
+      <circle cx="25.2" cy="51" r="0.8" fill="white" opacity="0.6" />
+      <circle cx="77.2" cy="51" r="0.8" fill="white" opacity="0.6" />
+
+      {/* ── ЧЁЛКА ── */}
+      <path d="M 17 40 Q 20 18 50 20 Q 80 18 83 40 Q 76 30 50 32 Q 24 30 17 40 Z" fill="url(#hairGrad)" />
       {/* Пряди чёлки */}
-      <path d="M 15 12 Q 18 18 16 22" stroke="#3d2010" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
-      <path d="M 22 10 Q 22 16 20 20" stroke="#3d2010" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.4" />
+      <path d="M 26 22 Q 30 32 28 40" stroke="#2e1508" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.5" />
+      <path d="M 38 19 Q 40 29 38 38" stroke="#2e1508" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.35" />
+      {/* Блик на волосах */}
+      <path d="M 34 22 Q 50 19 66 22" stroke="#a06030" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.35" />
 
-      {/* === РУКА (только waving) === */}
-      {mood === 'waving' && (
-        <g style={{ transformOrigin: '40px 50px', animation: 'waveHand 0.45s ease-in-out infinite alternate' }}>
-          <path d="M 40 50 Q 48 42 50 34" stroke="#f9c89e" strokeWidth="4" strokeLinecap="round" fill="none" />
-          {/* Кисть */}
-          <ellipse cx="50" cy="33" rx="4" ry="3.5" fill="#f9c89e" />
-          {/* Пальчики */}
-          <path d="M 48 30 Q 47 26 49 25" stroke="#f9c89e" strokeWidth="2" strokeLinecap="round" fill="none" />
-          <path d="M 51 29 Q 51 25 53 25" stroke="#f9c89e" strokeWidth="2" strokeLinecap="round" fill="none" />
-          <path d="M 53 31 Q 55 28 55 27" stroke="#f9c89e" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* ── РУКА (waving) ── */}
+      {isWaving && (
+        <g style={{ transformOrigin: '72px 80px', animation: 'waveHand 0.45s ease-in-out infinite alternate' }}>
+          <path d="M 72 80 Q 84 68 88 56" stroke="url(#skinGrad)" strokeWidth="7" strokeLinecap="round" fill="none" />
+          <ellipse cx="88" cy="54" rx="7" ry="6" fill="#fde0c0" />
+          <path d="M 84 48 Q 83 42 86 41" stroke="#fde0c0" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+          <path d="M 88 47 Q 88 41 91 41" stroke="#fde0c0" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+          <path d="M 92 50 Q 95 45 96 44" stroke="#fde0c0" strokeWidth="3.5" strokeLinecap="round" fill="none" />
         </g>
       )}
     </svg>
   );
 }
 
+/* ─────────────────────── ОСНОВНОЙ КОМПОНЕНТ ─────────────────────── */
 export default function AlenaGuide() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]               = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [mood, setMood] = useState<'idle' | 'talking' | 'waving' | 'thinking'>('idle');
-  const [displayed, setDisplayed] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [idleText, setIdleText] = useState(IDLE_PHRASES[0]);
-  const [showBubble, setShowBubble] = useState(false);
-  const [bobY, setBobY] = useState(0);
-  const [tourMode, setTourMode] = useState(false);
-  // Для анимации "прилетает" текст
-  const [msgKey, setMsgKey] = useState(0);
-  const typingRef = useRef<ReturnType<typeof setTimeout>>();
-  const bobRef = useRef<number>();
+  const [mood, setMood]               = useState<'idle' | 'talking' | 'waving' | 'thinking'>('idle');
+  const [displayed, setDisplayed]     = useState('');
+  const [isTyping, setIsTyping]       = useState(false);
+  const [idleText, setIdleText]       = useState(IDLE_PHRASES[0]);
+  const [showBubble, setShowBubble]   = useState(false);
+  const [bobY, setBobY]               = useState(0);
+  const [tourMode, setTourMode]       = useState(false);
+  const [msgKey, setMsgKey]           = useState(0);
+  // Компактный режим — панель свёрнута в полоску
+  const [compact, setCompact]         = useState(false);
+
+  const typingRef    = useRef<ReturnType<typeof setTimeout>>();
+  const bobRef       = useRef<number>();
   const idleTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Плавное покачивание
+  /* покачивание */
   useEffect(() => {
     let t = 0;
-    const animate = () => {
-      t += 0.025;
-      setBobY(Math.sin(t) * 6);
-      bobRef.current = requestAnimationFrame(animate);
-    };
+    const animate = () => { t += 0.025; setBobY(Math.sin(t) * 5); bobRef.current = requestAnimationFrame(animate); };
     bobRef.current = requestAnimationFrame(animate);
     return () => { if (bobRef.current) cancelAnimationFrame(bobRef.current); };
   }, []);
 
-  // Идл-фраза каждые 9 секунд
+  /* идл-пузырь */
   useEffect(() => {
     if (open) return;
     const show = () => {
-      const idx = Math.floor(Math.random() * IDLE_PHRASES.length);
-      setIdleText(IDLE_PHRASES[idx]);
-      setShowBubble(true);
-      setMood('waving');
-      idleTimerRef.current = setTimeout(() => {
-        setShowBubble(false);
-        setMood('idle');
-      }, 4200);
+      setIdleText(IDLE_PHRASES[Math.floor(Math.random() * IDLE_PHRASES.length)]);
+      setShowBubble(true); setMood('waving');
+      idleTimerRef.current = setTimeout(() => { setShowBubble(false); setMood('idle'); }, 4000);
     };
-    const interval = setInterval(show, 9000);
-    const t = setTimeout(show, 2500);
-    return () => {
-      clearInterval(interval);
-      clearTimeout(t);
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    };
+    const iv = setInterval(show, 9000);
+    const t  = setTimeout(show, 2500);
+    return () => { clearInterval(iv); clearTimeout(t); if (idleTimerRef.current) clearTimeout(idleTimerRef.current); };
   }, [open]);
 
   const typeText = useCallback((text: string) => {
     clearTimeout(typingRef.current);
-    setIsTyping(true);
-    setDisplayed('');
-    setMsgKey(k => k + 1);
-    setMood('talking');
+    setIsTyping(true); setDisplayed(''); setMsgKey(k => k + 1); setMood('talking');
     let i = 0;
-    const speed = 22;
     const tick = () => {
-      if (i <= text.length) {
-        setDisplayed(text.slice(0, i));
-        i++;
-        typingRef.current = setTimeout(tick, speed);
-      } else {
-        setIsTyping(false);
-        setMood('idle');
-      }
+      if (i <= text.length) { setDisplayed(text.slice(0, i)); i++; typingRef.current = setTimeout(tick, 20); }
+      else { setIsTyping(false); setMood('idle'); }
     };
     tick();
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
-    const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const startTour = () => {
-    setTourMode(true);
-    setCurrentStep(0);
-    setTimeout(() => {
-      typeText(TOUR_STEPS[0].text);
-      scrollToSection(TOUR_STEPS[0].section);
-    }, 200);
+    setTourMode(true); setCurrentStep(0); setCompact(false);
+    setTimeout(() => { typeText(TOUR_STEPS[0].text); scrollToSection(TOUR_STEPS[0].section); }, 200);
   };
 
   const nextStep = () => {
     if (isTyping) {
-      // Скипаем печатание
       clearTimeout(typingRef.current);
       setDisplayed(TOUR_STEPS[currentStep].text);
-      setIsTyping(false);
-      setMood('idle');
+      setIsTyping(false); setMood('idle');
       return;
     }
     if (currentStep < TOUR_STEPS.length - 1) {
       const next = currentStep + 1;
-      setCurrentStep(next);
-      setMood('thinking');
-      setTimeout(() => {
-        typeText(TOUR_STEPS[next].text);
-        scrollToSection(TOUR_STEPS[next].section);
-      }, 350);
+      setCurrentStep(next); setMood('thinking');
+      setTimeout(() => { typeText(TOUR_STEPS[next].text); scrollToSection(TOUR_STEPS[next].section); }, 300);
     } else {
       typeText('Экскурсия завершена! Надеюсь, я была полезна 😊 Сочи ждёт тебя!');
       setTimeout(() => setTourMode(false), 3500);
@@ -285,19 +275,13 @@ export default function AlenaGuide() {
   };
 
   const openChat = () => {
-    setShowBubble(false);
-    setOpen(true);
-    setMood('waving');
-    setTimeout(() => typeText('Привет! Я Алёна, гид по Сочи ✨ Хочешь, проведу тебя по всему сайту? Нажми «Начать экскурсию»!'), 400);
+    setShowBubble(false); setOpen(true); setCompact(false); setMood('waving');
+    setTimeout(() => typeText('Привет! Я Алёна, гид по Сочи ✨ Хочешь, проведу тебя по всему сайту? Нажми «Начать экскурсию»!'), 350);
   };
 
   const handleClose = () => {
-    setOpen(false);
-    setTourMode(false);
-    setDisplayed('');
-    clearTimeout(typingRef.current);
-    setIsTyping(false);
-    setMood('idle');
+    setOpen(false); setTourMode(false); setDisplayed('');
+    clearTimeout(typingRef.current); setIsTyping(false); setMood('idle'); setCompact(false);
   };
 
   const step = TOUR_STEPS[currentStep];
@@ -305,224 +289,176 @@ export default function AlenaGuide() {
   return (
     <>
       <style>{`
-        @keyframes waveHand {
-          from { transform: rotate(-15deg); }
-          to   { transform: rotate(25deg); }
-        }
-        @keyframes alenaPopIn {
-          0%   { opacity:0; transform: scale(0.75) translateY(16px); }
-          70%  { opacity:1; transform: scale(1.04) translateY(-3px); }
-          100% { opacity:1; transform: scale(1) translateY(0); }
-        }
-        @keyframes alenaBubble {
-          0%   { opacity:0; transform: scale(0.8) translateX(12px); }
-          70%  { opacity:1; transform: scale(1.03) translateX(-2px); }
-          100% { opacity:1; transform: scale(1) translateX(0); }
-        }
-        @keyframes alenaMsg {
-          0%   { opacity:0; transform: translateY(10px); }
-          100% { opacity:1; transform: translateY(0); }
-        }
-        @keyframes alenaSection {
-          0%   { opacity:0; transform: translateX(-8px); }
-          100% { opacity:1; transform: translateX(0); }
-        }
-        @keyframes pulse-ring {
-          0%   { transform: scale(1);   opacity:0.6; }
-          100% { transform: scale(1.5); opacity:0; }
-        }
-        .alena-panel   { animation: alenaPopIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-        .alena-bubble  { animation: alenaBubble 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-        .alena-msg     { animation: alenaMsg 0.35s ease forwards; }
-        .alena-section { animation: alenaSection 0.3s ease forwards; }
-        .alena-ring    { animation: pulse-ring 1.4s ease-out infinite; }
+        @keyframes waveHand  { from { transform:rotate(-15deg); } to { transform:rotate(25deg); } }
+        @keyframes alenaIn   { 0%{opacity:0;transform:scale(.8) translateY(12px)} 70%{transform:scale(1.03) translateY(-2px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes bubbleIn  { 0%{opacity:0;transform:scale(.85) translateX(10px)} 70%{transform:scale(1.02) translateX(-1px)} 100%{opacity:1;transform:scale(1) translateX(0)} }
+        @keyframes msgIn     { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes secIn     { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes pulseRing { 0%{transform:scale(1);opacity:.5} 100%{transform:scale(1.6);opacity:0} }
+        @keyframes blink     { 0%,90%,100%{opacity:1} 95%{opacity:0} }
+        .a-panel  { animation: alenaIn  .4s cubic-bezier(.34,1.56,.64,1) forwards; }
+        .a-bubble { animation: bubbleIn .35s cubic-bezier(.34,1.56,.64,1) forwards; }
+        .a-msg    { animation: msgIn    .3s ease forwards; }
+        .a-sec    { animation: secIn    .3s ease forwards; }
+        .a-ring   { animation: pulseRing 1.5s ease-out infinite; }
+        .a-blink  { animation: blink 3.5s ease-in-out infinite; }
       `}</style>
 
-      {/* Всё в нижнем ЛЕВОМ углу */}
       <div className="fixed bottom-6 left-6 z-[9999] flex flex-col items-start gap-3">
 
-        {/* ── Панель диалога ── */}
+        {/* ══════════ ПАНЕЛЬ ДИАЛОГА ══════════ */}
         {open && (
           <div
-            className="alena-panel flex flex-col rounded-3xl overflow-hidden"
+            className="a-panel flex flex-col rounded-3xl overflow-hidden"
             style={{
-              width: '310px',
-              maxHeight: '460px',
-              background: 'linear-gradient(160deg, rgba(24,32,48,0.97), rgba(18,24,36,0.99))',
-              border: '1px solid rgba(212,175,55,0.22)',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
+              width: compact ? '280px' : '300px',
+              /* Ключевое: при компактном режиме — только шапка + 1 строка */
+              maxHeight: compact ? '72px' : '400px',
+              transition: 'max-height .4s cubic-bezier(.4,0,.2,1), width .3s ease',
+              background: 'linear-gradient(160deg, rgba(14,20,36,0.93) 0%, rgba(10,16,28,0.97) 100%)',
+              border: '1px solid rgba(212,175,55,0.2)',
+              boxShadow: compact
+                ? '0 4px 24px rgba(0,0,0,0.4)'
+                : '0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,175,55,0.07)',
+              backdropFilter: 'blur(16px)',
             }}
           >
-            {/* Шапка */}
-            <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(212,175,55,0.06)' }}
+            {/* ── Шапка (всегда видна) ── */}
+            <div
+              className="flex items-center gap-3 px-3 py-2.5 flex-shrink-0 cursor-pointer select-none"
+              style={{ borderBottom: compact ? 'none' : '1px solid rgba(255,255,255,0.05)', background: 'rgba(212,175,55,0.06)' }}
+              onClick={() => setCompact(c => !c)}
+              title={compact ? 'Развернуть' : 'Свернуть'}
             >
-              <div className="w-9 h-9 flex-shrink-0">
-                <AlenaSvgAvatar mood={mood} />
+              {/* Мини-аватар в шапке */}
+              <div className="w-8 h-8 flex-shrink-0 rounded-full overflow-hidden"
+                style={{ border: '1.5px solid rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.06)' }}>
+                <AlenaFace mood={mood} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-display text-sm text-foreground leading-tight">Алёна</div>
                 <div className="font-body text-xs flex items-center gap-1.5" style={{ color: 'hsl(42,75%,58%)' }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                  {isTyping ? 'печатает...' : 'гид по Сочи'}
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                  {isTyping ? 'рассказывает...' : tourMode ? `${step.emoji} ${step.label}` : 'гид по Сочи'}
                 </div>
               </div>
-              {tourMode && (
-                <span className="font-body text-xs text-foreground/35 flex-shrink-0">
-                  {currentStep + 1}&thinsp;/&thinsp;{TOUR_STEPS.length}
+              {tourMode && !compact && (
+                <span className="font-body text-[11px] text-foreground/35 flex-shrink-0">
+                  {currentStep + 1}/{TOUR_STEPS.length}
                 </span>
               )}
-              <button onClick={handleClose}
-                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/8 transition-colors text-foreground/30 hover:text-foreground/70"
-              >
-                <Icon name="X" size={13} />
-              </button>
+              {/* Кнопки управления */}
+              <div className="flex gap-1">
+                <div className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-foreground/30">
+                  <Icon name={compact ? 'ChevronUp' : 'ChevronDown'} size={11} />
+                </div>
+                <button
+                  onClick={e => { e.stopPropagation(); handleClose(); }}
+                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-foreground/30 hover:text-foreground/70"
+                >
+                  <Icon name="X" size={11} />
+                </button>
+              </div>
             </div>
 
-            {/* Тело */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+            {/* ── Тело (скрывается при компактном режиме) ── */}
+            {!compact && (
+              <>
+                <div className="flex-1 overflow-y-auto px-4 pt-3 pb-2 flex flex-col gap-3" style={{ overflowY: 'auto' }}>
 
-              {/* Метка секции */}
-              {tourMode && (
-                <div key={`sec-${currentStep}`} className="alena-section flex items-center gap-2">
-                  <span className="text-base">{step.emoji}</span>
-                  <span className="font-body text-xs tracking-widest uppercase"
-                    style={{ color: 'hsl(42,75%,58%)' }}
+                  {/* Секция-метка */}
+                  {tourMode && (
+                    <div key={`sec-${currentStep}`} className="a-sec flex items-center gap-2">
+                      <span className="text-sm">{step.emoji}</span>
+                      <span className="font-body text-[11px] tracking-widest uppercase" style={{ color: 'hsl(42,75%,58%)' }}>
+                        {step.label}
+                      </span>
+                      <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right,rgba(212,175,55,.3),transparent)' }} />
+                    </div>
+                  )}
+
+                  {/* Сообщение */}
+                  <div
+                    key={msgKey}
+                    className="a-msg rounded-2xl rounded-tl-sm px-4 py-3"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(212,175,55,0.09), rgba(212,175,55,0.04))',
+                      border: '1px solid rgba(212,175,55,0.13)',
+                    }}
                   >
-                    {step.label}
-                  </span>
-                  <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(to right, rgba(212,175,55,0.3), transparent)' }} />
-                </div>
-              )}
+                    <p className="font-body text-sm leading-relaxed" style={{ color: 'rgba(255,245,220,.88)' }}>
+                      {displayed || <span style={{ opacity: .35 }}>...</span>}
+                      {isTyping && (
+                        <span
+                          className="inline-block w-[2px] h-[13px] ml-0.5 rounded-sm"
+                          style={{ background: 'hsl(42,75%,58%)', verticalAlign: 'middle', animation: 'pulse .7s ease-in-out infinite' }}
+                        />
+                      )}
+                    </p>
+                  </div>
 
-              {/* Сообщение */}
-              <div className="flex items-start gap-2.5">
-                <div className="w-8 h-8 flex-shrink-0 mt-0.5 rounded-full overflow-hidden"
-                  style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.15)' }}
-                >
-                  <AlenaSvgAvatar mood={mood} />
-                </div>
-                <div
-                  key={msgKey}
-                  className="alena-msg flex-1 rounded-2xl rounded-tl-sm px-4 py-3"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05))',
-                    border: '1px solid rgba(212,175,55,0.13)',
-                  }}
-                >
-                  <p className="font-body text-sm leading-relaxed" style={{ color: 'rgba(255,245,220,0.88)' }}>
-                    {displayed || <span className="opacity-40">...</span>}
-                    {isTyping && (
-                      <span
-                        className="inline-block w-[2px] h-[14px] ml-0.5 rounded-sm"
-                        style={{
-                          background: 'hsl(42,75%,58%)',
-                          verticalAlign: 'middle',
-                          animation: 'pulse 0.7s ease-in-out infinite',
-                        }}
-                      />
-                    )}
-                  </p>
-                  {isTyping && (
-                    <p className="font-body text-[10px] text-foreground/25 mt-1.5">нажми «Далее» чтобы пропустить</p>
+                  {/* Прогресс */}
+                  {tourMode && (
+                    <div className="flex gap-1.5 justify-center py-1">
+                      {TOUR_STEPS.map((_, i) => (
+                        <div key={i} className="rounded-full transition-all duration-300"
+                          style={{
+                            width: i === currentStep ? '20px' : '6px',
+                            height: '6px',
+                            background: i < currentStep ? 'rgba(212,175,55,.4)' : i === currentStep ? 'hsl(42,75%,58%)' : 'rgba(255,255,255,.1)',
+                          }}
+                        />
+                      ))}
+                    </div>
                   )}
                 </div>
-              </div>
 
-              {/* Прогресс-точки тура */}
-              {tourMode && (
-                <div className="flex gap-1.5 justify-center pt-1">
-                  {TOUR_STEPS.map((_, i) => (
-                    <div
-                      key={i}
-                      className="rounded-full transition-all duration-400"
-                      style={{
-                        width: i === currentStep ? '22px' : '6px',
-                        height: '6px',
-                        background: i < currentStep
-                          ? 'rgba(212,175,55,0.4)'
-                          : i === currentStep
-                          ? 'hsl(42,75%,58%)'
-                          : 'rgba(255,255,255,0.12)',
-                      }}
-                    />
-                  ))}
+                {/* Кнопки */}
+                <div className="px-3 pb-3 pt-1 flex flex-col gap-1.5 flex-shrink-0">
+                  {!tourMode ? (
+                    <button onClick={startTour}
+                      className="w-full py-2.5 rounded-2xl font-body text-sm font-semibold tracking-wide transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
+                      style={{ background: 'linear-gradient(135deg,hsl(42,75%,58%),hsl(35,80%,45%))', color: 'hsl(220,25%,8%)', boxShadow: '0 4px 18px rgba(212,175,55,.28)' }}
+                    >
+                      🎒 Начать экскурсию
+                    </button>
+                  ) : (
+                    <>
+                      <button onClick={nextStep}
+                        className="w-full py-2.5 rounded-2xl font-body text-sm font-semibold tracking-wide transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
+                        style={{ background: 'linear-gradient(135deg,hsl(42,75%,58%),hsl(35,80%,45%))', color: 'hsl(220,25%,8%)', boxShadow: '0 4px 18px rgba(212,175,55,.25)' }}
+                      >
+                        {isTyping ? '⏩ Пропустить' : currentStep < TOUR_STEPS.length - 1 ? `→ ${TOUR_STEPS[currentStep + 1].label}` : '✓ Завершить'}
+                      </button>
+                      {!isTyping && (
+                        <button
+                          onClick={() => { setTourMode(false); typeText('Хорошо! Если захочешь продолжить — нажми «Начать экскурсию» снова 😊'); }}
+                          className="w-full py-1.5 rounded-xl font-body text-xs text-foreground/30 hover:text-foreground/55 transition-colors"
+                        >
+                          Остановить
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Кнопки */}
-            <div className="px-4 py-3 flex flex-col gap-2 flex-shrink-0"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-            >
-              {!tourMode ? (
-                <button
-                  onClick={startTour}
-                  className="w-full py-3 rounded-2xl font-body text-sm tracking-wide font-semibold transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
-                  style={{
-                    background: 'linear-gradient(135deg, hsl(42,75%,58%), hsl(35,80%,45%))',
-                    color: 'hsl(220,25%,8%)',
-                    boxShadow: '0 4px 20px rgba(212,175,55,0.3)',
-                  }}
-                >
-                  🎒 Начать экскурсию
-                </button>
-              ) : (
-                <button
-                  onClick={nextStep}
-                  className="w-full py-3 rounded-2xl font-body text-sm tracking-wide font-semibold transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
-                  style={{
-                    background: 'linear-gradient(135deg, hsl(42,75%,58%), hsl(35,80%,45%))',
-                    color: 'hsl(220,25%,8%)',
-                    boxShadow: '0 4px 20px rgba(212,175,55,0.25)',
-                  }}
-                >
-                  {isTyping
-                    ? '⏩ Пропустить'
-                    : currentStep < TOUR_STEPS.length - 1
-                    ? `→ Далее: ${TOUR_STEPS[currentStep + 1].label}`
-                    : '✓ Завершить'}
-                </button>
-              )}
-              {tourMode && !isTyping && (
-                <button
-                  onClick={() => {
-                    setTourMode(false);
-                    typeText('Хорошо, остановимся! Если захочешь продолжить — нажми «Начать экскурсию» снова 😊');
-                  }}
-                  className="w-full py-1.5 rounded-xl font-body text-xs text-foreground/35 hover:text-foreground/60 transition-colors"
-                >
-                  Остановить экскурсию
-                </button>
-              )}
-            </div>
+              </>
+            )}
           </div>
         )}
 
-        {/* ── Идл-пузырь ── */}
+        {/* ══════════ ИДЛ-ПУЗЫРЬ ══════════ */}
         {showBubble && !open && (
-          <div
-            className="alena-bubble relative rounded-2xl px-4 py-3 max-w-[220px]"
-            style={{
-              background: 'rgba(20,28,44,0.96)',
-              border: '1px solid rgba(212,175,55,0.22)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            }}
+          <div className="a-bubble relative rounded-2xl px-4 py-2.5 max-w-[210px]"
+            style={{ background: 'rgba(14,20,36,0.95)', border: '1px solid rgba(212,175,55,.22)', boxShadow: '0 8px 28px rgba(0,0,0,.4)', backdropFilter: 'blur(12px)' }}
           >
-            <p className="font-body text-xs leading-relaxed" style={{ color: 'rgba(255,245,220,0.8)' }}>{idleText}</p>
-            {/* Хвостик вниз-влево */}
-            <div
-              className="absolute -bottom-2 left-6 w-3 h-3 rotate-45"
-              style={{
-                background: 'rgba(20,28,44,0.96)',
-                borderRight: '1px solid rgba(212,175,55,0.22)',
-                borderBottom: '1px solid rgba(212,175,55,0.22)',
-              }}
+            <p className="font-body text-xs leading-relaxed" style={{ color: 'rgba(255,245,220,.82)' }}>{idleText}</p>
+            <div className="absolute -bottom-2 left-5 w-3 h-3 rotate-45"
+              style={{ background: 'rgba(14,20,36,.95)', borderRight: '1px solid rgba(212,175,55,.22)', borderBottom: '1px solid rgba(212,175,55,.22)' }}
             />
           </div>
         )}
 
-        {/* ── Кнопка-аватар ── */}
+        {/* ══════════ КНОПКА-АВАТАР ══════════ */}
         <button
           onClick={open ? handleClose : openChat}
           className="relative focus:outline-none group"
@@ -530,45 +466,33 @@ export default function AlenaGuide() {
             width: '80px',
             height: '80px',
             transform: `translateY(${bobY}px)`,
-            filter: 'drop-shadow(0 10px 28px rgba(212,175,55,0.35))',
-            transition: 'filter 0.3s ease',
+            filter: 'drop-shadow(0 10px 28px rgba(212,175,55,.35))',
+            transition: 'filter .3s ease',
           }}
           title="Алёна — гид по Сочи"
         >
           {/* Пульсирующее кольцо */}
-          {!open && (
-            <div
-              className="alena-ring absolute inset-0 rounded-full"
-              style={{ border: '2px solid rgba(212,175,55,0.4)' }}
-            />
-          )}
+          {!open && <div className="a-ring absolute inset-0 rounded-full" style={{ border: '2px solid rgba(212,175,55,.4)' }} />}
 
-          {/* Фон */}
-          <div
-            className="absolute inset-0 rounded-full transition-all duration-300 group-hover:scale-105"
+          {/* Фон кнопки */}
+          <div className="absolute inset-0 rounded-full transition-all duration-300 group-hover:scale-105"
             style={{
-              background: 'linear-gradient(135deg, hsl(220,28%,14%), hsl(215,30%,20%))',
-              border: '2px solid rgba(212,175,55,0.5)',
-              boxShadow: '0 0 24px rgba(212,175,55,0.2), inset 0 1px 0 rgba(255,255,255,0.06)',
+              background: 'linear-gradient(135deg, hsl(220,28%,15%), hsl(215,30%,20%))',
+              border: '2.5px solid rgba(212,175,55,.55)',
+              boxShadow: '0 0 20px rgba(212,175,55,.18), inset 0 1px 0 rgba(255,255,255,.05)',
             }}
           />
 
-          {/* SVG аватар — чуть больше внутри */}
-          <div className="absolute" style={{ inset: '4px' }}>
-            <AlenaSvgAvatar mood={open ? 'idle' : mood} />
+          {/* Большой аватар */}
+          <div className="absolute" style={{ inset: '3px' }}>
+            <AlenaFace mood={open ? 'idle' : mood} />
           </div>
 
-          {/* Онлайн-индикатор */}
-          <div
-            className="absolute bottom-0 right-0 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{
-              background: 'hsl(220,28%,14%)',
-              border: '1.5px solid rgba(255,255,255,0.08)',
-            }}
+          {/* Онлайн */}
+          <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full flex items-center justify-center"
+            style={{ background: 'hsl(220,28%,14%)', border: '1.5px solid rgba(255,255,255,.07)' }}
           >
-            <div className="w-3 h-3 rounded-full bg-emerald-400"
-              style={{ animation: 'pulse 2s ease-in-out infinite' }}
-            />
+            <div className="w-3 h-3 rounded-full bg-emerald-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
           </div>
         </button>
       </div>
