@@ -196,6 +196,21 @@ function AlenaFace({ mood }: { mood: 'idle' | 'talking' | 'waving' | 'thinking' 
   );
 }
 
+/* ─── Убираем эмодзи из текста для TTS ─── */
+function stripEmoji(text: string) {
+  return text.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').replace(/[\u2600-\u27FF]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+/* ─── Подбираем женский голос ─── */
+function pickFemaleVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  const ruFemale = voices.find(v => v.lang.startsWith('ru') && /female|женский|Anna|Milena|Irina|Katya|Oksana/i.test(v.name));
+  if (ruFemale) return ruFemale;
+  const ruAny = voices.find(v => v.lang.startsWith('ru'));
+  if (ruAny) return ruAny;
+  return voices.find(v => /female|Samantha|Karen|Victoria|Moira|Tessa|Fiona/i.test(v.name)) ?? voices[0] ?? null;
+}
+
 /* ─────────────────────── ОСНОВНОЙ КОМПОНЕНТ ─────────────────────── */
 export default function AlenaGuide() {
   const [open, setOpen]               = useState(false);
@@ -208,8 +223,10 @@ export default function AlenaGuide() {
   const [bobY, setBobY]               = useState(0);
   const [tourMode, setTourMode]       = useState(false);
   const [msgKey, setMsgKey]           = useState(0);
-  // Компактный режим — панель свёрнута в полоску
   const [compact, setCompact]         = useState(false);
+  // Голос
+  const [voiceOn, setVoiceOn]         = useState(true);
+  const [speaking, setSpeaking]       = useState(false);
 
   const typingRef    = useRef<ReturnType<typeof setTimeout>>();
   const bobRef       = useRef<number>();
@@ -236,16 +253,47 @@ export default function AlenaGuide() {
     return () => { clearInterval(iv); clearTimeout(t); if (idleTimerRef.current) clearTimeout(idleTimerRef.current); };
   }, [open]);
 
+  /* ── Синтез речи ── */
+  const speak = useCallback((text: string) => {
+    if (!voiceOn || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const clean = stripEmoji(text);
+    if (!clean) return;
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.lang  = 'ru-RU';
+    utter.rate  = 1.08;   // чуть быстрее — живее
+    utter.pitch = 1.35;   // высокий тон — аниме-стиль
+    utter.volume = 0.92;
+    // Голос подбираем после загрузки списка
+    const setVoice = () => {
+      const v = pickFemaleVoice();
+      if (v) utter.voice = v;
+    };
+    if (window.speechSynthesis.getVoices().length) setVoice();
+    else window.speechSynthesis.addEventListener('voiceschanged', setVoice, { once: true });
+
+    utter.onstart = () => setSpeaking(true);
+    utter.onend   = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(utter);
+  }, [voiceOn]);
+
+  const stopSpeaking = useCallback(() => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setSpeaking(false);
+  }, []);
+
   const typeText = useCallback((text: string) => {
     clearTimeout(typingRef.current);
     setIsTyping(true); setDisplayed(''); setMsgKey(k => k + 1); setMood('talking');
+    speak(text);
     let i = 0;
     const tick = () => {
       if (i <= text.length) { setDisplayed(text.slice(0, i)); i++; typingRef.current = setTimeout(tick, 20); }
       else { setIsTyping(false); setMood('idle'); }
     };
     tick();
-  }, []);
+  }, [speak]);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -262,6 +310,7 @@ export default function AlenaGuide() {
       clearTimeout(typingRef.current);
       setDisplayed(TOUR_STEPS[currentStep].text);
       setIsTyping(false); setMood('idle');
+      stopSpeaking();
       return;
     }
     if (currentStep < TOUR_STEPS.length - 1) {
@@ -282,6 +331,15 @@ export default function AlenaGuide() {
   const handleClose = () => {
     setOpen(false); setTourMode(false); setDisplayed('');
     clearTimeout(typingRef.current); setIsTyping(false); setMood('idle'); setCompact(false);
+    stopSpeaking();
+  };
+
+  /* Переключаем голос: если выключаем — сразу останавливаем */
+  const toggleVoice = () => {
+    setVoiceOn(v => {
+      if (v) stopSpeaking();
+      return !v;
+    });
   };
 
   const step = TOUR_STEPS[currentStep];
@@ -296,6 +354,7 @@ export default function AlenaGuide() {
         @keyframes secIn     { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
         @keyframes pulseRing { 0%{transform:scale(1);opacity:.5} 100%{transform:scale(1.6);opacity:0} }
         @keyframes blink     { 0%,90%,100%{opacity:1} 95%{opacity:0} }
+        @keyframes soundBar  { from{transform:scaleY(.3)} to{transform:scaleY(1)} }
         .a-panel  { animation: alenaIn  .4s cubic-bezier(.34,1.56,.64,1) forwards; }
         .a-bubble { animation: bubbleIn .35s cubic-bezier(.34,1.56,.64,1) forwards; }
         .a-msg    { animation: msgIn    .3s ease forwards; }
@@ -338,8 +397,23 @@ export default function AlenaGuide() {
               <div className="flex-1 min-w-0">
                 <div className="font-display text-sm text-foreground leading-tight">Алёна</div>
                 <div className="font-body text-xs flex items-center gap-1.5" style={{ color: 'hsl(42,75%,58%)' }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
-                  {isTyping ? 'рассказывает...' : tourMode ? `${step.emoji} ${step.label}` : 'гид по Сочи'}
+                  {speaking && voiceOn ? (
+                    <span className="flex items-end gap-[2px] h-3">
+                      {[0.5, 1, 0.7, 1.2, 0.6].map((h, i) => (
+                        <span key={i} className="w-[2px] rounded-full inline-block"
+                          style={{
+                            height: `${h * 9}px`,
+                            background: 'hsl(42,75%,58%)',
+                            animation: 'soundBar .55s ease-in-out infinite alternate',
+                            animationDelay: `${i * 0.1}s`,
+                          }}
+                        />
+                      ))}
+                    </span>
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                  )}
+                  {speaking && voiceOn ? 'говорит...' : isTyping ? 'рассказывает...' : tourMode ? `${step.emoji} ${step.label}` : 'гид по Сочи'}
                 </div>
               </div>
               {tourMode && !compact && (
@@ -348,12 +422,30 @@ export default function AlenaGuide() {
                 </span>
               )}
               {/* Кнопки управления */}
-              <div className="flex gap-1">
+              <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                {/* Кнопка голоса */}
+                <button
+                  onClick={toggleVoice}
+                  className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200"
+                  style={{
+                    background: voiceOn ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${voiceOn ? 'rgba(212,175,55,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                  }}
+                  title={voiceOn ? 'Выключить голос' : 'Включить голос'}
+                >
+                  <Icon
+                    name={voiceOn ? (speaking ? 'Volume2' : 'Volume1') : 'VolumeX'}
+                    size={11}
+                    style={{ color: voiceOn ? 'hsl(42,75%,58%)' : 'rgba(255,255,255,0.3)' }}
+                  />
+                </button>
+                {/* Свернуть */}
                 <div className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-foreground/30">
                   <Icon name={compact ? 'ChevronUp' : 'ChevronDown'} size={11} />
                 </div>
+                {/* Закрыть */}
                 <button
-                  onClick={e => { e.stopPropagation(); handleClose(); }}
+                  onClick={handleClose}
                   className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-foreground/30 hover:text-foreground/70"
                 >
                   <Icon name="X" size={11} />
