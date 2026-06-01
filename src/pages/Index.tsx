@@ -7,8 +7,10 @@ import GallerySection from '@/components/GallerySection';
 import ToursSection from '@/components/ToursSection';
 import HotelsSection from '@/components/HotelsSection';
 import WeatherSection from '@/components/WeatherSection';
+import MapSection from '@/components/MapSection';
 import ContactsSection from '@/components/ContactsSection';
 import Footer from '@/components/Footer';
+import AlenaGuide from '@/components/AlenaGuide';
 
 export default function Index() {
   return (
@@ -22,8 +24,10 @@ export default function Index() {
       <ToursSection />
       <HotelsSection />
       <WeatherSection />
+      <MapSection />
       <ContactsSection />
       <Footer />
+      <AlenaGuide />
     </div>
   );
 }
